@@ -20,11 +20,6 @@ A game launcher using [Rofi](https://github.com/davatorium/rofi) for Steam, desi
 - Simply put the provided config files into your Rofi folder, and you're good to go.
 - For launching non-Steam games or shortcuts added to Steam, you will need to add a **SteamGridDB API key**. This can be done by running the `add_steamgridDB_api.sh` script in your terminal.
 
-## Bugs & Limitations
-
-- Currently **only works with Hyprland**.
-- Other desktop environments may not be supported, but feel free to submit a **PR** if you have a solution!
-
 ## Screenshots
 
 Add screenshots of your launcher in action here:
@@ -32,9 +27,14 @@ Add screenshots of your launcher in action here:
 ![Screenshot 1](link-to-screenshot-1)
 ![Screenshot 2](link-to-screenshot-2)
 
+## Bugs & Limitations
+
+- Currently **only works with Hyprland**.
+- Other desktop environments may not be supported, but feel free to submit a **PR** if you have a solution!
+
 ## Contribution
 
-If you’d like to contribute, especially if you have solutions to support other desktop environments, feel free to create a **pull request (PR)**.
+If you’d like to contribute, feel free to create a **pull request (PR)**.
 
 ## License
 
@@ -44,6 +44,5 @@ This project is licensed under a **Generic License**. Please refer to the [LICEN
 
 ### Credits
 
-- **Rofi** for the launcher UI.
-- **SteamGridDB** for the game artwork API.
+- [ntcarlson](https://github.com/ntcarlson/dotfiles/tree/delta/config/rofi) for the initial configs
 
