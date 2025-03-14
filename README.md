@@ -24,8 +24,8 @@ A game launcher using [Rofi](https://github.com/davatorium/rofi) for Steam, desi
 
 Add screenshots of your launcher in action here:
 
-![Screenshot 1](link-to-screenshot-1)
-![Screenshot 2](link-to-screenshot-2)
+![Screenshot 1](https://github.com/nx-smul/rofi-hyprlauncher/blob/main/assests/Screenshot1.png)
+![Screenshot 2](https://github.com/nx-smul/rofi-hyprlauncher/blob/main/assests/Screenshot2.png)
 
 ## Bugs & Limitations
 
