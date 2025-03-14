@@ -8,13 +8,6 @@ A game launcher using [Rofi](https://github.com/davatorium/rofi) for Steam, desi
 - Tested with **Lutris**, **Rare**, and **Heroic Launcher**.
 - Easy integration of **non-Steam games** or **added shortcuts** via SteamGridDB API.
 
-## Installation
-
-1. Download the repository.
-2. Place the provided configuration files in your **Rofi** folder.
-3. For non-Steam games or added shortcuts, obtain a **SteamGridDB API key**.
-4. To add your SteamGridDB API key, run the `add_steamgridDB_api.sh` script.
-
 ## Usage
 
 - Simply put the provided config files into your Rofi folder, and you're good to go.
