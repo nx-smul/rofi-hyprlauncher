@@ -17,7 +17,10 @@ STATE_DIR = os.path.expanduser("~/.local/state")
 SteamGridDB_API = os.path.join(STATE_DIR, "steamgriddb_apikey")
 STEAM_APP_ID_FILE = os.path.join(STATE_DIR, "steamAPP_id")
 BASE_URL = "https://www.steamgriddb.com/api/v2"
-ADD_API = os.path.join(CONFIG_DIR, "rofi", "add_steamgridDB_api.sh")
+
+# Timeout for HTTP requests
+TIMEOUT = 10  # Timeout in seconds
+
 # Function to compute shortcut ID
 
 
@@ -32,17 +35,22 @@ def load_processed_app_ids():
     if os.path.exists(STEAM_APP_ID_FILE):
         with open(STEAM_APP_ID_FILE, 'r') as f:
             for line in f:
-                if line.strip().isdigit():
-                    processed_app_ids.add(int(line.strip()))
+                line = line.strip()
+                if line.isdigit():  # Check if the line is a valid number
+                    processed_app_ids.add(int(line))
     return processed_app_ids
 
-
 # Save processed app IDs to file
+
+
 def save_processed_app_ids(app_ids):
-    os.makedirs(STATE_DIR, exist_ok=True)
-    with open(STEAM_APP_ID_FILE, 'w') as f:
-        for app_id in app_ids:
-            f.write(f"{app_id}\n")
+    os.makedirs(STATE_DIR, exist_ok=True)  # Ensure the directory exists
+    if app_ids:  # Check if app_ids is not empty
+        with open(STEAM_APP_ID_FILE, 'w') as f:
+            for app_id in app_ids:
+                f.write(f"{app_id}\n")
+        print(f"New app IDs to save: {app_ids}")
+        print(f"Processed app IDs saved to {STEAM_APP_ID_FILE}")
 
 # Search for images by name in SteamGridDB
 
@@ -52,49 +60,61 @@ def search_images_by_name(name, API_KEY):
         "Authorization": f"Bearer {API_KEY}"
     }
     url = f"{BASE_URL}/search/autocomplete/{name}"
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()["data"]
-        if data:
-            return data[0]["id"]
+    try:
+        response = requests.get(url, headers=headers, timeout=TIMEOUT)
+        if response.status_code == 200:
+            data = response.json().get("data", [])
+            if data:
+                return data[0]["id"]
+    except requests.exceptions.RequestException:
+        pass
     return None
 
-
 # Fetch image URL from SteamGridDB
+
+
 def fetch_image(app_id, image_type, API_KEY):
     headers = {
         "Authorization": f"Bearer {API_KEY}"
     }
     url = f"{BASE_URL}/{image_type}/game/{app_id}"
-    response = requests.get(url, headers=headers)
 
-    if response.status_code == 200:
-        data = response.json()["data"]
-        if data:
-            return data[0]["url"]
+    try:
+        response = requests.get(url, headers=headers, timeout=TIMEOUT)
+        if response.status_code == 200:
+            data = response.json().get("data", [])
+            if data:
+                return data[0]["url"]
+    except requests.exceptions.RequestException:
+        pass
+
     return None
 
-
 # Download image from URL
+
+
 def download_image(url, dest_path):
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(dest_path, 'wb') as f:
-            for chunk in response.iter_content(1024):
-                f.write(chunk)
-        return True
+    try:
+        response = requests.get(url, stream=True, timeout=TIMEOUT)
+        if response.status_code == 200:
+            with open(dest_path, 'wb') as f:
+                for chunk in response.iter_content(1024):
+                    f.write(chunk)
+            return True
+    except requests.exceptions.RequestException:
+        pass
     return False
 
-
 # Create library cache for a game
+
+
 def create_library_cache(app_id, original_app_id, name, exe, force=False, API_KEY=None):
     shortcut_id = get_shortcut_id(original_app_id)
     cache_dir = os.path.join(steam_cache, f"{shortcut_id}")
 
     if not force and os.path.exists(cache_dir):
         print(f"Appcache folder already exists for {
-              name} Skipping image download.\n")
+              name}. Skipping image download.\n")
         return
 
     os.makedirs(cache_dir, exist_ok=True)
@@ -120,8 +140,9 @@ def create_library_cache(app_id, original_app_id, name, exe, force=False, API_KE
 
     print()  # Add space after processing
 
-
 # Delete library cache for a game that was removed from shortcuts.vdf
+
+
 def delete_library_cache(processed_app_ids, current_app_ids):
     for app_id in processed_app_ids:
         if app_id not in current_app_ids:
@@ -137,11 +158,12 @@ def delete_library_cache(processed_app_ids, current_app_ids):
                     print(f"Error deleting cache for app_id: {
                           shortcut_id} - {e}")
 
-
 # Parse shortcuts.vdf file and process the games
+
+
 def parse_shortcuts(file_path, force=False, API_KEY=None):
-    processed_app_ids = load_processed_app_ids()
-    new_app_ids = set()
+    processed_app_ids = load_processed_app_ids()  # Load already processed app IDs
+    new_app_ids = set()  # Ensure we are starting with an empty set for new app IDs
 
     if os.path.getsize(file_path) == 0:
         print(f"{file_path} is empty. No shortcuts to process.")
@@ -162,8 +184,8 @@ def parse_shortcuts(file_path, force=False, API_KEY=None):
 
             if steamgrid_app_id:
                 if original_app_id not in new_app_ids:
-                    print(f"Processing {name} (original_app_id: {
-                          original_app_id}, Launch_appid: {shortcut_id} SteamGridDB ID: {steamgrid_app_id})...")
+                    print(f"Processing {name} (original_app_id: {original_app_id}, Launch_appid: {
+                          shortcut_id}, SteamGridDB ID: {steamgrid_app_id})...")
                     new_app_ids.add(original_app_id)
 
                     create_library_cache(
@@ -174,14 +196,19 @@ def parse_shortcuts(file_path, force=False, API_KEY=None):
         except Exception as e:
             print(f"Error processing {game.name}: {e}")
 
+    # Save the processed app IDs (only new app IDs)
+    save_processed_app_ids(new_app_ids)  # Save only new app IDs
+
+    # Delete library cache for the apps that are no longer in shortcuts.vdf
     delete_library_cache(processed_app_ids, current_app_ids)
 
     print("Finished processing all app IDs.")
     if not force:
         print("\nTo overwrite appcache folders, use the '--force' flag.")
 
-
 # Main script logic
+
+
 def main():
     API_KEY = load_api_key()
 

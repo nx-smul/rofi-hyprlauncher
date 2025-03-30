@@ -59,7 +59,7 @@ if __name__ == "__main__":
     if non_steam_games:
         print("List of non-Steam games found:")
         for game in non_steam_games:
-            print(f"Name: {game.name}, Alt ID: {
-                  game.alt_id}, Process Name: {game.process_name}")
+            print(f"Name: {game.name}, Game ID: {
+                  game.alt_id}, Source: {game.process_name}")
     else:
         print("No non-Steam games found.")
